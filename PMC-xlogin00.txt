@@ -1,0 +1,76 @@
+Architektury Výpočetních Systémů (AVS 2021)
+Projekt č. 2 (PMC)
+Login: xlogin00
+
+Úloha 1: Paralelizace původního řešení
+===============================================================================
+
+1) Kterou ze smyček (viz zadání) je vhodnější paralelizovat a co způsobuje 
+   neefektivitu paralelizaci té druhé?
+
+   Je vhodnejšie paralelizovať vonkajšiu smyčku (v marchCubes), počet iterácií vnútornej smyčky (v evaluateFieldAt) je príliš nízky.
+
+2) Jaké plánování (rozdělení práce mezi vlákna) jste zvolili a proč? 
+   Jaký vliv má velikost "chunk" při dynamickém plánování (8, 16, 32, 64)?
+
+   [Zvolil som plánovanie (dynamic, 1), pretože pri testovaní vykazovalo najlepšie výsledky (lepšie ako auto)]
+
+   Zvetšovanie velkosti chunk pri dynamickom plánovaní znižuje réžiju spojenou s pridelovaním iterácií vláknam, ale znižuje efektivitu vyvažovania záťaže (resp. vyvažovanie bude hrubšie).
+
+3) Jakým způsobem zajišťujete ukládání trojúhelníků z několika vláken současně?
+
+   Zámkom (direktívou critical)
+
+
+Úloha 2: Paralelní průchod stromem
+===============================================================================
+
+1) Stručně popište použití OpenMP tasků ve vašem řešení.
+
+   Pre každé zanorenie stromu je vytvorený nový task. 
+
+2) Jakým způsobem jste realizovali sesbírání celkového počtu trojúhelníků?
+
+   Redukciou pomocou bininárneho zámku (direktíva atomic) k zdielanej premennej počtu trojúhelníků
+
+3) Jaký vliv má na vaše řešení tzv. "cut-off"? Je vhodné vytvářet nový 
+   task pro každou krychli na nejnižší úrovni?
+
+   Cut-off iný ako 1 vyžaduje prepočítanie súradníc na generovanie jednotlivých kociek v podpriestore.
+   Zvýšený cut-off (v mojom prípade 8, teda 512 kociek) zlepší využitie procesorov.
+
+4) Jakým způsobem zajišťujete ukládání trojúhelníků z několika vláken současně?
+
+   Binárnym zámkom (rovnako ako v loop riešení)
+
+Úloha 3: Grafy škálování všech řešení
+===============================================================================
+
+1) Stručně zhodnoťte efektivitu vytvořených řešení (na základě grafů škálování).
+
+2) V jakém případě (v závislosti na počtu bodů ve vstupním souboru a velikosti 
+   mřížky) bude vaše řešení 1. úlohy neefektivní? (pokud takový případ existuje)
+
+3) Je (nebo není) stromový algoritmus efektivnější z pohledu slabého škálování 
+   vzhledem ke vstupu?
+
+Úloha 4: Analýza využití jader pomocí VTune
+================================================================================
+
+1) Jaké bylo průměrné využití jader pro všechny tři implementace s omezením na 
+   18 vláken? Na kolik procent byly využity?
+   
+   ref: 0.996 (5.55%)
+   loop: 16.645 (92.47%)
+   tree: 15.918 (88.43%)
+
+2) Jaké bylo průměrné využití jader pro všechny tři implementace s využitím 
+   všech jader? Na kolik procent se podařilo využít obě CPU?
+   
+   ref: 0.996 (2.8%)
+   loop: 30.172 (83.8%)
+   tree: 26.356 (73.2%)
+
+3) Jaké jsou závěry z těchto měření?
+
+   Tree implementácia je menej efektívna ako Loop implementácia. Obe sú efektivnějšie pri 18 jadrách.
